@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_crm_lead_form_bookingpro" model="ir.ui.view">
+        <field name="name">crm.lead.form.bookingpro</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="BookingPro" invisible="not bookingpro_appointment_id">
+                    <field name="bookingpro_appointment_id" readonly="1"/>
+                    <field name="bookingpro_service_id" readonly="1"/>
+                    <field name="bookingpro_start_datetime" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_bookingpro_crm_leads" model="ir.actions.act_window">
+        <field name="name">CRM Leads</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,kanban,form,calendar,pivot,graph</field>
+        <field name="domain">[('bookingpro_appointment_id','!=',False)]</field>
+        <field name="context">{'default_type': 'lead'}</field>
+    </record>
+</odoo>

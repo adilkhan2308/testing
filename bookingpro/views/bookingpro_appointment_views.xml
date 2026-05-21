@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bookingpro_appointment_tree" model="ir.ui.view">
+        <field name="name">bookingpro.appointment.list</field>
+        <field name="model">bookingpro.appointment</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state in ('confirmed','completed','paid')" decoration-muted="state in ('cancelled','no_show')" decoration-warning="state in ('pending','payment_pending','reschedule_requested')">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="service_id"/>
+                <field name="staff_user_id"/>
+                <field name="resource_id"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="state" widget="badge"/>
+                <field name="payment_state" widget="badge"/>
+                <field name="followup_state" widget="badge"/>
+                <field name="customer_followup_state" widget="badge"/>
+                <field name="read_ai_status" widget="badge"/>
+                <field name="price"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_bookingpro_appointment_kanban" model="ir.ui.view">
+        <field name="name">bookingpro.appointment.kanban</field>
+        <field name="model">bookingpro.appointment</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="service_id"/>
+                <field name="staff_user_id"/>
+                <field name="start_datetime"/>
+                <field name="state"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div><field name="partner_id"/></div>
+                            <div><field name="service_id"/></div>
+                            <div><field name="staff_user_id"/></div>
+                            <div><field name="start_datetime"/></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_bookingpro_appointment_calendar" model="ir.ui.view">
+        <field name="name">bookingpro.appointment.calendar</field>
+        <field name="model">bookingpro.appointment</field>
+        <field name="arch" type="xml">
+            <calendar string="Appointments" date_start="start_datetime" date_stop="end_datetime" color="staff_user_id" event_open_popup="true" quick_create="false">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="service_id"/>
+                <field name="staff_user_id"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_bookingpro_reschedule_wizard" model="ir.actions.act_window">
+        <field name="name">Reschedule Appointment</field>
+        <field name="res_model">bookingpro.reschedule.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_bookingpro_appointment_form" model="ir.ui.view">
+        <field name="name">bookingpro.appointment.form</field>
+        <field name="model">bookingpro.appointment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="state not in ('draft','pending','rescheduled','paid')"/>
+                    <button name="action_mark_payment_pending" string="Payment Pending" type="object" invisible="state not in ('draft','pending')"/>
+                    <button name="action_mark_paid" string="Mark Paid" type="object" invisible="payment_state == 'paid'"/>
+                    <button name="action_start" string="Start" type="object" invisible="state not in ('confirmed','rescheduled','paid')"/>
+                    <button name="action_complete" string="Complete" type="object" class="btn-primary" invisible="state not in ('in_progress','confirmed','rescheduled','paid')"/>
+                    <button name="action_schedule_followup" string="Schedule Internal Follow-up" type="object" invisible="state in ('draft','cancelled')"/>
+                    <button name="action_send_customer_followup_email" string="Send Customer Follow-up Email" type="object" invisible="not customer_followup_requested"/>
+                    <button name="action_mark_customer_followup_done" string="Mark Customer Follow-up Done" type="object" invisible="customer_followup_state == 'done'"/>
+                    <button name="action_send_to_readai" string="Send to Read.ai" type="object" invisible="state in ('draft','cancelled')"/>
+                    <button name="action_request_reschedule" string="Request Reschedule" type="object" invisible="state not in ('confirmed','paid','rescheduled')"/>
+                    <button name="%(action_bookingpro_reschedule_wizard)d" string="Reschedule" type="action" invisible="state in ('cancelled','completed','invoiced')"/>
+                    <button name="action_no_show" string="No-show" type="object" invisible="state not in ('confirmed','rescheduled')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('cancelled','completed','invoiced')"/>
+                    <button name="action_create_invoice" string="Create Invoice" type="object" invisible="state not in ('completed','paid') or invoice_id"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,confirmed,in_progress,completed,invoiced"/>
+                </header>
+                <sheet>
+                    <field name="calendar_event_id" invisible="1"/>
+                    <field name="crm_lead_id" invisible="1"/>
+                    <field name="invoice_id" invisible="1"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_calendar_event" type="object" class="oe_stat_button" icon="fa-calendar" invisible="not calendar_event_id">
+                            <span>Calendar</span>
+                        </button>
+                        <button name="action_view_crm_lead" type="object" class="oe_stat_button" icon="fa-handshake-o" invisible="not crm_lead_id">
+                            <span>CRM Lead</span>
+                        </button>
+                        <button name="action_view_invoice" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="not invoice_id">
+                            <span>Invoice</span>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <separator string="Customer"/>
+                        <group>
+                            <field name="partner_id" context="{'default_company_type':'person'}"/>
+                            <field name="customer_email"/>
+                            <field name="customer_phone"/>
+                        </group>
+                        <separator string="Appointment"/>
+                        <group>
+                            <field name="service_id"/>
+                            <field name="category_id"/>
+                            <field name="staff_user_id"/>
+                            <field name="resource_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <group>
+                        <separator string="Schedule"/>
+                        <group>
+                            <field name="start_datetime"/>
+                            <field name="end_datetime"/>
+                            <field name="duration"/>
+                        </group>
+                        <separator string="Payment"/>
+                        <group>
+                            <field name="payment_state"/>
+                            <field name="price"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="invoice_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Customer Notes">
+                            <field name="customer_note" placeholder="Notes submitted by customer..."/>
+                        </page>
+                        <page string="Internal CRM Notes">
+                            <field name="internal_note" widget="html" placeholder="Internal notes, follow-up information, instructions..."/>
+                        </page>
+                        <page string="CRM Lead">
+                            <group>
+                                <field name="crm_lead_id" readonly="1"/>
+                                <button name="action_create_crm_lead" string="Create/Link CRM Lead" type="object" class="btn-primary"/>
+                            </group>
+                        </page>
+                        <page string="Follow-up">
+                            <group>
+                                <field name="followup_state"/>
+                                <field name="followup_user_id"/>
+                                <field name="followup_date"/>
+                                <field name="followup_activity_id" readonly="1"/>
+                                <field name="followup_note"/>
+                                <button name="action_mark_followup_done" string="Mark Internal Follow-up Done" type="object" class="btn-secondary"/>
+                                <separator string="Customer Follow-up Email"/>
+                                <field name="customer_followup_requested"/>
+                                <field name="customer_followup_requested_at" readonly="1"/>
+                                <field name="customer_followup_state"/>
+                                <field name="customer_followup_due_datetime"/>
+                                <field name="customer_followup_next_email_datetime" readonly="1"/>
+                                <field name="customer_followup_interval_hours"/>
+                                <field name="customer_followup_max_emails"/>
+                                <field name="customer_followup_email_count" readonly="1"/>
+                                <field name="customer_followup_last_email_datetime" readonly="1"/>
+                                <field name="customer_followup_email_sent" readonly="1"/>
+                                <field name="customer_followup_email_sent_datetime" readonly="1"/>
+                                <field name="customer_followup_message"/>
+                                <field name="customer_followup_email_error" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Read.ai">
+                            <group>
+                                <field name="read_ai_status" readonly="1"/>
+                                <field name="read_ai_meeting_url"/>
+                                <field name="read_ai_external_id"/>
+                                <field name="read_ai_response" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Reminders">
+                            <group>
+                                <field name="reminder_5h_sent" readonly="1"/>
+                                <field name="reminder_1h_sent" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Reschedule History">
+                            <field name="reschedule_history_ids" readonly="1">
+                                <list>
+                                    <field name="old_start_datetime"/>
+                                    <field name="new_start_datetime"/>
+                                    <field name="requested_by_id"/>
+                                    <field name="reason"/>
+                                    <field name="approval_state"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Notifications">
+                            <field name="notification_log_ids" readonly="1">
+                                <list>
+                                    <field name="create_date"/>
+                                    <field name="notification_type"/>
+                                    <field name="channel"/>
+                                    <field name="partner_id"/>
+                                    <field name="recipient"/>
+                                    <field name="state"/>
+                                    <field name="error_message"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Feedback">
+                            <field name="feedback_ids">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="rating"/>
+                                    <field name="comments"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_bookingpro_appointment_search" model="ir.ui.view">
+        <field name="name">bookingpro.appointment.search</field>
+        <field name="model">bookingpro.appointment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="service_id"/>
+                <field name="staff_user_id"/>
+                <field name="crm_lead_id"/>
+                <filter name="today" string="Today" domain="[('start_datetime','&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')), ('start_datetime','&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <filter name="this_month" string="This Month" domain="[('start_datetime','&gt;=', context_today().replace(day=1).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter name="pending" string="Pending" domain="[('state','in',('pending','payment_pending','reschedule_requested'))]"/>
+                <filter name="confirmed" string="Confirmed" domain="[('state','=','confirmed')]"/>
+                <filter name="completed" string="Completed" domain="[('state','=','completed')]"/>
+                <filter name="cancelled" string="Cancelled" domain="[('state','=','cancelled')]"/>
+                <filter name="followup_scheduled" string="Internal Follow-up Scheduled" domain="[('followup_state','=','scheduled')]"/>
+                <filter name="customer_followup_requested" string="Customer Follow-up Requested" domain="[('customer_followup_requested','=',True)]"/>
+                <filter name="customer_followup_email_queued" string="Customer Follow-up Email Queued" domain="[('customer_followup_state','=','email_queued')]"/>
+                <filter name="read_ai_failed" string="Read.ai Failed" domain="[('read_ai_status','=','failed')]"/>
+                <group name="group_by">
+                    <filter name="group_by_state" string="Status" context="{'group_by':'state'}"/>
+                    <filter name="group_followup" string="Internal Follow-up" context="{'group_by':'followup_state'}"/>
+                    <filter name="group_customer_followup" string="Customer Follow-up" context="{'group_by':'customer_followup_state'}"/>
+                    <filter name="service" string="Service" context="{'group_by':'service_id'}"/>
+                    <filter name="staff" string="Staff" context="{'group_by':'staff_user_id'}"/>
+                    <filter name="customer" string="Customer" context="{'group_by':'partner_id'}"/>
+                    <filter name="date" string="Date" context="{'group_by':'start_datetime:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bookingpro_appointment" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="res_model">bookingpro.appointment</field>
+        <field name="view_mode">list,kanban,calendar,form,pivot,graph</field>
+        <field name="search_view_id" ref="view_bookingpro_appointment_search"/>
+    </record>
+
+    <record id="action_bookingpro_appointment_calendar" model="ir.actions.act_window">
+        <field name="name">Appointment Calendar</field>
+        <field name="res_model">bookingpro.appointment</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="search_view_id" ref="view_bookingpro_appointment_search"/>
+    </record>
+
+    <record id="action_bookingpro_followups" model="ir.actions.act_window">
+        <field name="name">Follow-ups</field>
+        <field name="res_model">bookingpro.appointment</field>
+        <field name="view_mode">list,form,kanban,calendar</field>
+        <field name="domain">[('followup_state','=','scheduled')]</field>
+        <field name="search_view_id" ref="view_bookingpro_appointment_search"/>
+    </record>
+</odoo>

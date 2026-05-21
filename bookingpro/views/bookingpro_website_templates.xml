@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="bookingpro_service_page" name="BookingPro Services">
+        <t t-call="website.layout">
+            <style>
+                /* BookingPro page-only cleanup: hide Odoo default website/header top bar */
+                #wrapwrap > header,
+                header,
+                footer,
+                .o_footer,
+                #top,
+                #top_menu,
+                #top_menu_collapse,
+                .navbar,
+                .o_header_standard,
+                .o_header_affixed,
+                .o_header_overlay,
+                .o_header_is_scrolled,
+                .o_frontend_to_backend_nav,
+                .o_frontend_to_backend,
+                .o_frontend_to_backend_apps_btn,
+                .o_frontend_to_backend_edit_btn,
+                #oe_main_menu_navbar,
+                .o_main_navbar,
+                .o_website_edit_top_bar,
+                .o_website_edit_actions,
+                .o_website_preview,
+                .o_website_edit_menu,
+                .o_website_editor {
+                    display: none !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                    height: 0 !important;
+                    min-height: 0 !important;
+                    max-height: 0 !important;
+                    overflow: hidden !important;
+                }
+                body, #wrapwrap, main, #wrap {
+                    padding-top: 0 !important;
+                    margin-top: 0 !important;
+                }
+            </style>
+            <div id="wrap" class="bp-public-wrap bp-booking-home">
+                <section class="bp-hero-section">
+                    <div class="container">
+                        <div class="row align-items-center g-4">
+                            <div class="col-lg-7">
+                                <span class="bp-eyebrow">Premium appointment booking</span>
+                                <h1>Book your appointment in a few simple steps</h1>
+                                <p class="bp-hero-text">Choose a service, pick an available time, and submit your details. The team will receive your request instantly.</p>
+                                <div class="bp-hero-meta" t-if="booking_company">
+                                    <span>Booking for</span>
+                                    <strong><t t-out="booking_company.name"/></strong>
+                                </div>
+                                <div class="bp-hero-actions">
+                                    <a href="#bp_services_grid" class="bp-btn bp-btn-primary">Explore services</a>
+                                    <a t-att-href="booking_base_url" class="bp-btn bp-btn-soft">Refresh availability</a>
+                                    <a href="/my/bookingpro" class="bp-btn bp-btn-soft bp-btn-portal-return">My Appointments</a>
+                                </div>
+                            </div>
+                            <div class="col-lg-5">
+                                <div class="bp-hero-panel">
+                                    <div class="bp-panel-icon">✓</div>
+                                    <h3>Fast online scheduling</h3>
+                                    <p>Service selection, staff preference, live slots, CRM lead capture, reminders, and follow-up are connected in one flow.</p>
+                                    <div class="bp-mini-stats">
+                                        <div><strong><t t-out="len(services)"/></strong><span>Services</span></div>
+                                        <div><strong><t t-out="len(categories)"/></strong><span>Categories</span></div>
+                                        <div><strong>24/7</strong><span>Booking</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="container bp-service-browser" id="bp_services_grid">
+                    <div class="bp-section-head">
+                        <div>
+                            <span class="bp-eyebrow dark">Select a service</span>
+                            <h2>Available booking options</h2>
+                            <p>Browse services by category and start a new appointment booking.</p>
+                        </div>
+                        <div class="bp-search-box">
+                            <span>⌕</span>
+                            <input type="search" id="bp_service_search" placeholder="Search service or category..."/>
+                        </div>
+                    </div>
+
+                    <t t-if="services">
+                        <div class="bp-category-tabs">
+                            <button class="bp-category-pill active" type="button" data-bp-category="all">All</button>
+                            <t t-foreach="categories" t-as="category">
+                                <button class="bp-category-pill" type="button" t-att-data-bp-category="category.id"><t t-out="category.name"/></button>
+                            </t>
+                        </div>
+                    </t>
+
+                    <t t-foreach="categories" t-as="category">
+                        <div class="bp-category-block" t-att-data-category-block="category.id">
+                            <div class="bp-category-title">
+                                <div>
+                                    <h3><t t-out="category.name"/></h3>
+                                    <p t-if="category.description"><t t-out="category.description"/></p>
+                                </div>
+                            </div>
+                            <div class="row g-4">
+                                <t t-foreach="services.filtered(lambda s: s.category_id.id == category.id)" t-as="service">
+                                    <div class="col-lg-4 col-md-6 bp-service-item" t-att-data-bp-category="category.id" t-att-data-bp-search="(service.name or '') + ' ' + (category.name or '')">
+                                        <article class="bp-service-card">
+                                            <div class="bp-service-top">
+                                                <div class="bp-service-icon"><t t-out="(service.name or 'B')[:1].upper()"/></div>
+                                                <span class="bp-service-badge"><t t-out="category.name"/></span>
+                                            </div>
+                                            <h4><t t-out="service.name"/></h4>
+                                            <div class="bp-service-meta">
+                                                <span><i>⏱</i><t t-out="service.duration"/> hour(s)</span>
+                                                <span t-if="service.price"><i>💳</i><t t-out="service.currency_id.symbol"/><t t-out="service.price"/></span>
+                                            </div>
+                                            <p class="bp-service-desc" t-if="service.description" t-out="service.description"/>
+                                            <p class="bp-service-desc" t-if="not service.description">Select this service and choose a suitable staff member and time slot.</p>
+                                            <a class="bp-btn bp-btn-primary bp-card-action" t-att-href="'%s/service/%s' % (booking_base_url, service.id)">Book Now</a>
+                                        </article>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <t t-if="not services">
+                        <div class="bp-empty-state">
+                            <div class="bp-empty-icon">📅</div>
+                            <h3>No services available</h3>
+                            <p>No services are currently published for online booking. Please contact the team or check again later.</p>
+                        </div>
+                    </t>
+                </section>
+            </div>
+            <script type="text/javascript">
+// <![CDATA[
+                document.addEventListener('DOMContentLoaded', function () {
+                    const search = document.getElementById('bp_service_search');
+                    const pills = document.querySelectorAll('.bp-category-pill');
+                    const cards = document.querySelectorAll('.bp-service-item');
+                    let activeCategory = 'all';
+                    function applyFilter() {
+                        const q = (search ? search.value : '').toLowerCase().trim();
+                        cards.forEach(function (card) {
+                            const catOk = activeCategory === 'all' || card.dataset.bpCategory === activeCategory;
+                            const textOk = !q || (card.dataset.bpSearch || '').toLowerCase().includes(q);
+                            card.style.display = catOk && textOk ? '' : 'none';
+                        });
+                    }
+                    pills.forEach(function (pill) {
+                        pill.addEventListener('click', function () {
+                            pills.forEach(p => p.classList.remove('active'));
+                            pill.classList.add('active');
+                            activeCategory = pill.dataset.bpCategory || 'all';
+                            applyFilter();
+                        });
+                    });
+                    if (search) search.addEventListener('input', applyFilter);
+                });
+// ]]>
+            </script>
+        </t>
+    </template>
+
+    <template id="bookingpro_booking_form" name="BookingPro Booking Form">
+        <t t-call="website.layout">
+            <style>
+                /* BookingPro page-only cleanup: hide Odoo default website/header top bar */
+                #wrapwrap > header,
+                header,
+                footer,
+                .o_footer,
+                #top,
+                #top_menu,
+                #top_menu_collapse,
+                .navbar,
+                .o_header_standard,
+                .o_header_affixed,
+                .o_header_overlay,
+                .o_header_is_scrolled,
+                .o_frontend_to_backend_nav,
+                .o_frontend_to_backend,
+                .o_frontend_to_backend_apps_btn,
+                .o_frontend_to_backend_edit_btn,
+                #oe_main_menu_navbar,
+                .o_main_navbar,
+                .o_website_edit_top_bar,
+                .o_website_edit_actions,
+                .o_website_preview,
+                .o_website_edit_menu,
+                .o_website_editor {
+                    display: none !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                    height: 0 !important;
+                    min-height: 0 !important;
+                    max-height: 0 !important;
+                    overflow: hidden !important;
+                }
+                body, #wrapwrap, main, #wrap {
+                    padding-top: 0 !important;
+                    margin-top: 0 !important;
+                }
+            </style>
+            <div id="wrap" class="bp-public-wrap bp-form-page">
+                <section class="container py-5">
+                    <div class="bp-booking-shell">
+                        <aside class="bp-booking-side">
+                            <a t-att-href="booking_base_url" class="bp-back-link">← Back to services</a>
+                            <span class="bp-eyebrow">New appointment</span>
+                            <h1><t t-out="service.name"/></h1>
+                            <p t-if="booking_company" class="bp-client-line">Client: <strong><t t-out="booking_company.name"/></strong></p>
+                            <div class="bp-side-metrics">
+                                <div><span>Duration</span><strong><t t-out="service.duration"/> hour(s)</strong></div>
+                                <div t-if="service.price"><span>Price</span><strong><t t-out="service.currency_id.symbol"/><t t-out="service.price"/></strong></div>
+                            </div>
+                            <p class="bp-side-desc" t-if="service.description" t-out="service.description"/>
+                            <p class="bp-side-desc" t-if="not service.description">Complete the form and select an available slot. You will receive booking confirmation and follow-up updates based on the configured email workflow.</p>
+                            <div class="bp-process-list">
+                                <div><b>1</b><span>Select staff, resource, date and slot</span></div>
+                                <div><b>2</b><span>Add customer contact information</span></div>
+                                <div><b>3</b><span>Submit booking and follow-up request</span></div>
+                            </div>
+                        </aside>
+
+                        <main class="bp-booking-main">
+                            <div class="bp-form-header">
+                                <div>
+                                    <span class="bp-eyebrow dark">Booking details</span>
+                                    <h2>Complete your appointment request</h2>
+                                </div>
+                                <span class="bp-secure-badge">Secure request</span>
+                            </div>
+                            <form t-att-action="booking_base_url + '/confirm'" method="post" class="bp-premium-form bookingpro-form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="service_id" t-att-value="service.id"/>
+                                <input type="hidden" name="start_datetime" id="bp_start_datetime"/>
+                                <input type="hidden" name="end_datetime" id="bp_end_datetime"/>
+                                <input type="hidden" name="slot_staff_id" id="bp_slot_staff_id"/>
+                                <input type="hidden" name="slot_resource_id" id="bp_slot_resource_id"/>
+                                <input type="hidden" id="bp_slots_url" t-att-value="booking_base_url + '/slots'"/>
+
+                                <div class="bp-form-section">
+                                    <div class="bp-form-section-title"><span>01</span><h3>Schedule</h3></div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Preferred Staff</label>
+                                            <select class="form-select" name="staff_id" id="bp_staff_id">
+                                                <option value="">Any available staff</option>
+                                                <t t-foreach="staff_users" t-as="staff">
+                                                    <option t-att-value="staff.id"><t t-out="staff.name"/></option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Resource</label>
+                                            <select class="form-select" name="resource_id" id="bp_resource_id">
+                                                <option value="">No preference</option>
+                                                <t t-foreach="resources" t-as="resource">
+                                                    <option t-att-value="resource.id"><t t-out="resource.name"/></option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Preferred Date</label>
+                                            <input type="date" class="form-control" id="bp_date" required="required" t-att-min="today"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Available Slot</label>
+                                            <select class="form-select" id="bp_slot_select" required="required">
+                                                <option value="">Select date first</option>
+                                            </select>
+                                            <small id="bp_slot_help" class="bp-field-hint">Slots are generated from staff availability and existing bookings.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bp-form-section">
+                                    <div class="bp-form-section-title"><span>02</span><h3>Customer information</h3></div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Full Name</label>
+                                            <input type="text" class="form-control" name="customer_name" required="required" placeholder="Enter customer name"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email Address</label>
+                                            <input type="email" class="form-control" name="customer_email" required="required" placeholder="name@example.com"/>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="text" class="form-control" name="customer_phone" placeholder="Phone / WhatsApp number"/>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Booking Notes</label>
+                                            <textarea class="form-control" name="customer_note" rows="3" placeholder="Share any important details for this appointment."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bp-form-section bp-followup-box">
+                                    <div class="bp-form-section-title"><span>03</span><h3>Follow-up preference</h3></div>
+                                    <label class="bp-followup-toggle" for="bp_customer_followup_requested">
+                                        <input class="form-check-input" type="checkbox" name="customer_followup_requested" id="bp_customer_followup_requested" checked="checked"/>
+                                        <span>
+                                            <strong>I would like the team to follow up with me about this booking.</strong>
+                                            <small>Follow-up emails can be sent automatically using the configured SMTP flow.</small>
+                                        </span>
+                                    </label>
+                                    <label class="form-label mt-3">Follow-up Message / Question</label>
+                                    <textarea class="form-control" name="customer_followup_message" rows="3" placeholder="Add any follow-up question or instruction for the team."></textarea>
+                                </div>
+
+                                <div class="bp-form-actions">
+                                    <button type="submit" class="bp-btn bp-btn-primary bp-submit-btn">Confirm Booking</button>
+                                    <a t-att-href="booking_base_url" class="bp-btn bp-btn-soft">Back to services</a>
+                                </div>
+                            </form>
+                        </main>
+                    </div>
+                </section>
+            </div>
+            <script type="text/javascript">
+// <![CDATA[
+                document.addEventListener('DOMContentLoaded', function () {
+                    const dateInput = document.getElementById('bp_date');
+                    const staffInput = document.getElementById('bp_staff_id');
+                    const resourceInput = document.getElementById('bp_resource_id');
+                    const slotSelect = document.getElementById('bp_slot_select');
+                    const slotHelp = document.getElementById('bp_slot_help');
+                    const startInput = document.getElementById('bp_start_datetime');
+                    const endInput = document.getElementById('bp_end_datetime');
+                    const slotStaffInput = document.getElementById('bp_slot_staff_id');
+                    const slotResourceInput = document.getElementById('bp_slot_resource_id');
+                    const slotsUrl = document.getElementById('bp_slots_url').value;
+                    const serviceId = document.querySelector('input[name="service_id"]').value;
+
+                    async function loadSlots() {
+                        if (!dateInput.value) return;
+                        startInput.value = '';
+                        endInput.value = '';
+                        slotStaffInput.value = '';
+                        slotResourceInput.value = '';
+                        slotSelect.innerHTML = '<option value="">Loading available slots...</option>';
+                        if (slotHelp) slotHelp.textContent = 'Checking staff availability and booking conflicts...';
+                        try {
+                            const response = await fetch(slotsUrl, {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({
+                                    jsonrpc: '2.0',
+                                    method: 'call',
+                                    params: {
+                                        service_id: serviceId,
+                                        selected_date: dateInput.value,
+                                        staff_id: staffInput.value || false,
+                                        resource_id: resourceInput.value || false
+                                    }
+                                })
+                            });
+                            const payload = await response.json();
+                            const result = payload.result || {};
+                            slotSelect.innerHTML = '<option value="">Select slot</option>';
+                            if (result.success && result.slots.length) {
+                                result.slots.forEach(function(slot) {
+                                    const option = document.createElement('option');
+                                    option.value = slot.start + '|' + slot.end + '|' + (slot.staff_id || '') + '|' + (slot.resource_id || '');
+                                    option.textContent = slot.label + (slot.staff_name ? ' · ' + slot.staff_name : '');
+                                    slotSelect.appendChild(option);
+                                });
+                                if (slotHelp) slotHelp.textContent = result.slots.length + ' slot(s) available for the selected date.';
+                            } else {
+                                slotSelect.innerHTML = '<option value="">No available slots</option>';
+                                if (slotHelp) slotHelp.textContent = 'No slot is available for this date. Please choose another date or staff member.';
+                            }
+                        } catch (error) {
+                            slotSelect.innerHTML = '<option value="">Unable to load slots</option>';
+                            if (slotHelp) slotHelp.textContent = 'Please refresh the page or contact the team.';
+                        }
+                    }
+                    [dateInput, staffInput, resourceInput].forEach(el => el.addEventListener('change', loadSlots));
+                    slotSelect.addEventListener('change', function () {
+                        const parts = this.value.split('|');
+                        startInput.value = parts[0] || '';
+                        endInput.value = parts[1] || '';
+                        slotStaffInput.value = parts[2] || '';
+                        slotResourceInput.value = parts[3] || '';
+                    });
+                });
+// ]]>
+            </script>
+        </t>
+    </template>
+
+    <template id="bookingpro_thanks_page" name="BookingPro Thanks Page">
+        <t t-call="website.layout">
+            <style>
+                /* BookingPro page-only cleanup: hide Odoo default website/header top bar */
+                #wrapwrap > header,
+                header,
+                footer,
+                .o_footer,
+                #top,
+                #top_menu,
+                #top_menu_collapse,
+                .navbar,
+                .o_header_standard,
+                .o_header_affixed,
+                .o_header_overlay,
+                .o_header_is_scrolled,
+                .o_frontend_to_backend_nav,
+                .o_frontend_to_backend,
+                .o_frontend_to_backend_apps_btn,
+                .o_frontend_to_backend_edit_btn,
+                #oe_main_menu_navbar,
+                .o_main_navbar,
+                .o_website_edit_top_bar,
+                .o_website_edit_actions,
+                .o_website_preview,
+                .o_website_edit_menu,
+                .o_website_editor {
+                    display: none !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                    height: 0 !important;
+                    min-height: 0 !important;
+                    max-height: 0 !important;
+                    overflow: hidden !important;
+                }
+                body, #wrapwrap, main, #wrap {
+                    padding-top: 0 !important;
+                    margin-top: 0 !important;
+                }
+            </style>
+            <section class="bp-public-wrap bp-thanks-page">
+                <div class="container py-5">
+                    <div class="bp-thanks-card mx-auto">
+                        <div class="bp-success-icon">✓</div>
+                        <span class="bp-eyebrow dark">Booking submitted</span>
+                        <h1>Thank you!</h1>
+                        <p class="lead">Your booking request has been submitted successfully.</p>
+                        <div class="bp-thanks-summary">
+                            <div><span>Reference</span><strong><t t-out="appointment.name"/></strong></div>
+                            <div><span>Service</span><strong><t t-out="appointment.service_id.name"/></strong></div>
+                            <div><span>Date/Time</span><strong><t t-out="appointment.start_datetime"/></strong></div>
+                        </div>
+                        <div class="bp-form-actions justify-content-center">
+                            <a t-att-href="booking_base_url" class="bp-btn bp-btn-primary mt-3">Book another appointment</a>
+                            <a href="/my/bookingpro" class="bp-btn bp-btn-soft mt-3">Open customer portal</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </t>
+    </template>
+
+    <template id="bookingpro_error_page" name="BookingPro Error Page">
+        <t t-call="website.layout">
+            <style>
+                /* BookingPro page-only cleanup: hide Odoo default website/header top bar */
+                #wrapwrap > header,
+                header,
+                footer,
+                .o_footer,
+                #top,
+                #top_menu,
+                #top_menu_collapse,
+                .navbar,
+                .o_header_standard,
+                .o_header_affixed,
+                .o_header_overlay,
+                .o_header_is_scrolled,
+                .o_frontend_to_backend_nav,
+                .o_frontend_to_backend,
+                .o_frontend_to_backend_apps_btn,
+                .o_frontend_to_backend_edit_btn,
+                #oe_main_menu_navbar,
+                .o_main_navbar,
+                .o_website_edit_top_bar,
+                .o_website_edit_actions,
+                .o_website_preview,
+                .o_website_edit_menu,
+                .o_website_editor {
+                    display: none !important;
+                    visibility: hidden !important;
+                    pointer-events: none !important;
+                    height: 0 !important;
+                    min-height: 0 !important;
+                    max-height: 0 !important;
+                    overflow: hidden !important;
+                }
+                body, #wrapwrap, main, #wrap {
+                    padding-top: 0 !important;
+                    margin-top: 0 !important;
+                }
+            </style>
+            <section class="bp-public-wrap">
+                <div class="container py-5">
+                    <div class="bp-empty-state bp-error-state">
+                        <div class="bp-empty-icon">!</div>
+                        <h3>Booking Error</h3>
+                        <p><t t-out="error"/></p>
+                        <a t-att-href="booking_base_url or '/bookingpro'" class="bp-btn bp-btn-primary">Back to booking</a>
+                    </div>
+                </div>
+            </section>
+        </t>
+    </template>
+</odoo>

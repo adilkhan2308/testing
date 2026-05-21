@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="bookingpro_login_page" name="BookingPro Login">
+        <t t-call="website.layout">
+            <script>document.body.classList.add('bp-auth-mode');</script>
+            <div class="bp-auth-shell">
+                <div class="bp-auth-panel">
+                    <div class="bp-auth-brand">
+                        <div class="bp-auth-logo">BP</div>
+                        <div>
+                            <h1>BookingPro</h1>
+                            <p>Secure appointment workspace</p>
+                        </div>
+                    </div>
+                    <div class="bp-auth-copy">
+                        <span class="bp-auth-eyebrow">Role based access</span>
+                        <h2>Login to the right portal automatically.</h2>
+                        <p>Administrators and booking managers go to the full workspace. Staff members see their operational appointments. Customers only access their own booking portal.</p>
+                    </div>
+                    <div class="bp-role-grid">
+                        <div class="bp-role-card"><strong>Admin</strong><span>Full workspace, settings, SMTP, services, CRM, reports.</span></div>
+                        <div class="bp-role-card"><strong>Staff</strong><span>Assigned appointments, schedule updates, customer follow-up.</span></div>
+                        <div class="bp-role-card"><strong>Customer</strong><span>Own appointments, reschedule/cancel request, follow-up view.</span></div>
+                    </div>
+                </div>
+                <div class="bp-auth-card">
+                    <div class="bp-auth-card-head">
+                        <span class="bp-auth-eyebrow">Welcome back</span>
+                        <h2>Sign in</h2>
+                        <p>Use your registered email or username and password.</p>
+                    </div>
+                    <t t-if="error">
+                        <div class="bp-auth-alert bp-auth-alert-danger"><t t-out="error"/></div>
+                    </t>
+                    <t t-if="success == 'account_created'">
+                        <div class="bp-auth-alert bp-auth-alert-success">Your customer account has been created. Please login to continue.</div>
+                    </t>
+                    <form class="bp-auth-form" action="/web/login" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="redirect" t-att-value="redirect or '/bookingpro/post-login'"/>
+                        <label>Email or Username</label>
+                        <input type="text" name="login" t-att-value="login or ''" placeholder="Email or username, e.g. admin" required="required" autocomplete="username"/>
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Your password" required="required" autocomplete="current-password"/>
+                        <button class="bp-auth-btn bp-auth-btn-primary" type="submit">Login</button>
+                    </form>
+                    <div class="bp-auth-footer-line">
+                        <span>New customer?</span>
+                        <a href="/bookingpro/signup">Create customer account</a>
+                    </div>
+                    <div class="bp-auth-note">
+                        Admin and staff roles are assigned by the system administrator through BookingPro access groups.
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="bookingpro_signup_page" name="BookingPro Customer Signup">
+        <t t-call="website.layout">
+            <script>document.body.classList.add('bp-auth-mode');</script>
+            <div class="bp-auth-shell">
+                <div class="bp-auth-panel">
+                    <div class="bp-auth-brand">
+                        <div class="bp-auth-logo">BP</div>
+                        <div>
+                            <h1>BookingPro</h1>
+                            <p>Customer account registration</p>
+                        </div>
+                    </div>
+                    <div class="bp-auth-copy">
+                        <span class="bp-auth-eyebrow">Customer portal</span>
+                        <h2>Create an account to manage your appointments.</h2>
+                        <p>This registration creates a customer-only account. It will not give access to the admin workspace or Odoo backend.</p>
+                    </div>
+                    <div class="bp-role-grid single">
+                        <div class="bp-role-card"><strong>Customer access only</strong><span>View your bookings, follow-up status, cancellation request, and reschedule request.</span></div>
+                    </div>
+                </div>
+                <div class="bp-auth-card">
+                    <div class="bp-auth-card-head">
+                        <span class="bp-auth-eyebrow">New account</span>
+                        <h2>Create customer account</h2>
+                        <p>Fill the form below to create a secure customer portal account.</p>
+                    </div>
+                    <t t-if="error">
+                        <div class="bp-auth-alert bp-auth-alert-danger"><t t-out="error"/></div>
+                    </t>
+                    <form class="bp-auth-form" action="/bookingpro/signup" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="role" value="customer"/>
+                        <label>Full Name</label>
+                        <input type="text" name="name" t-att-value="name or ''" placeholder="Your full name" required="required" autocomplete="name"/>
+                        <label>Email</label>
+                        <input type="email" name="email" t-att-value="login or ''" placeholder="you@example.com" required="required" autocomplete="email"/>
+                        <label>Phone</label>
+                        <input type="text" name="phone" t-att-value="phone or ''" placeholder="Phone number" autocomplete="tel"/>
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Minimum 6 characters" required="required" autocomplete="new-password"/>
+                        <label>Confirm Password</label>
+                        <input type="password" name="confirm_password" placeholder="Repeat password" required="required" autocomplete="new-password"/>
+                        <button class="bp-auth-btn bp-auth-btn-primary" type="submit">Create Customer Account</button>
+                    </form>
+                    <div class="bp-auth-footer-line">
+                        <span>Already have an account?</span>
+                        <a href="/bookingpro/login">Login</a>
+                    </div>
+                    <div class="bp-auth-note">
+                        Admin/staff access is protected and must be configured by an administrator.
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

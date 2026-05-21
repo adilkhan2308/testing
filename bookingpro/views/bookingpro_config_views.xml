@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bookingpro_res_config_settings" model="ir.ui.view">
+        <field name="name">res.config.settings.bookingpro.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="BookingPro" string="BookingPro" name="bookingpro">
+                    <block title="Client / Multi-tenant Booking Link" name="bookingpro_client_link">
+                        <setting string="Client Booking Slug" help="Used for per-client booking links such as /bookingpro/c/client-name.">
+                            <field name="bookingpro_company_slug"/>
+                        </setting>
+                        <setting string="Public Booking Link" help="Copy this link and share it with the client/customer.">
+                            <field name="bookingpro_company_public_booking_url" readonly="1"/>
+                        </setting>
+                    </block>
+                    <block title="Booking Rules" name="bookingpro_booking_rules">
+                        <setting string="Slot Step Minutes" help="Controls the time gap between generated public booking slots.">
+                            <field name="bookingpro_slot_step_minutes"/>
+                        </setting>
+                        <setting string="Auto Confirm Public Bookings" help="Automatically confirm bookings when payment is not required.">
+                            <field name="bookingpro_auto_confirm"/>
+                        </setting>
+                        <setting string="Require Payment" help="Move public bookings into payment pending status before confirmation.">
+                            <field name="bookingpro_require_payment"/>
+                        </setting>
+                    </block>
+                    <block title="CRM and Follow-up" name="bookingpro_crm_followup">
+                        <setting string="Create CRM Lead" help="Automatically creates a CRM lead for every website booking.">
+                            <field name="bookingpro_create_crm_lead"/>
+                        </setting>
+                        <setting string="Auto Follow-up" help="Automatically schedules an internal follow-up activity after completed/no-show appointments.">
+                            <field name="bookingpro_auto_followup_on_completion"/>
+                        </setting>
+                        <setting string="Follow-up Delay Days" help="Number of days after completion/no-show to schedule the internal follow-up activity.">
+                            <field name="bookingpro_followup_delay_days"/>
+                        </setting>
+                        <setting string="Enable Customer Follow-up" help="Allow customer follow-up requests from booking page and customer portal.">
+                            <field name="bookingpro_enable_customer_followup"/>
+                        </setting>
+                        <setting string="Auto Customer Follow-up on Booking" help="Automatically request customer follow-up for every new booking.">
+                            <field name="bookingpro_auto_customer_followup_on_booking"/>
+                        </setting>
+                        <setting string="Send Follow-up Email on Booking" help="Queue customer follow-up email immediately after booking using Odoo SMTP/outgoing mail server.">
+                            <field name="bookingpro_send_customer_followup_email_on_booking"/>
+                        </setting>
+                        <setting string="Send Follow-up Email After Completion" help="Queue customer follow-up email when appointment is completed or marked no-show.">
+                            <field name="bookingpro_send_customer_followup_after_completion"/>
+                        </setting>
+                        <setting string="Create Internal Activity for Customer Follow-up" help="Create an internal activity for staff/admin when customer follow-up is requested.">
+                            <field name="bookingpro_create_internal_activity_for_customer_followup"/>
+                        </setting>
+                        <setting string="Customer Follow-up Interval Hours" help="Customer follow-up emails are sent repeatedly every 1 or 5 hours until the maximum email count is reached or the follow-up is marked done.">
+                            <field name="bookingpro_customer_followup_interval_hours"/>
+                        </setting>
+                        <setting string="Customer Follow-up Max Emails" help="Stops automatic customer follow-up emails after this count to avoid unlimited emails.">
+                            <field name="bookingpro_customer_followup_max_emails"/>
+                        </setting>
+                    </block>
+                    <block title="Email / SMTP Reminders" name="bookingpro_email_reminders">
+                        <setting string="Enable Email Reminders" help="Uses Odoo Outgoing Mail Server / SMTP. Configure SMTP in Odoo Settings before enabling reminders.">
+                            <field name="bookingpro_enable_email_reminders"/>
+                        </setting>
+                        <setting string="5 Hour Reminder" help="Send email reminder approximately 5 hours before appointment.">
+                            <field name="bookingpro_send_5h_reminder"/>
+                        </setting>
+                        <setting string="1 Hour Reminder" help="Send email reminder approximately 1 hour before appointment.">
+                            <field name="bookingpro_send_1h_reminder"/>
+                        </setting>
+                    </block>
+                    <block title="Read.ai Integration" name="bookingpro_readai">
+                        <setting string="Enable Read.ai Hook" help="Sends appointment payload to your configured Read.ai API/webhook URL.">
+                            <field name="bookingpro_readai_enabled"/>
+                        </setting>
+                        <setting string="Read.ai API/Webhook URL" help="Paste the Read.ai API endpoint or automation webhook URL.">
+                            <field name="bookingpro_readai_api_url"/>
+                        </setting>
+                        <setting string="Read.ai API Key" help="Optional bearer token/API key used when sending appointment payloads.">
+                            <field name="bookingpro_readai_api_key"/>
+                        </setting>
+                    </block>
+                    <block title="Portal Permissions" name="bookingpro_portal_rules">
+                        <setting string="Allow Portal Cancellation" help="Allow customers to submit cancellation requests from portal.">
+                            <field name="bookingpro_allow_portal_cancel"/>
+                        </setting>
+                        <setting string="Allow Portal Reschedule" help="Allow customers to submit reschedule requests from portal.">
+                            <field name="bookingpro_allow_portal_reschedule"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_bookingpro_config_settings" model="ir.actions.act_window">
+        <field name="name">BookingPro Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'module_bookingpro': True}</field>
+    </record>
+</odoo>

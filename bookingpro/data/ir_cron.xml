@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_bookingpro_send_reminders" model="ir.cron">
+            <field name="name">BookingPro: Send Appointment Reminders</field>
+            <field name="model_id" ref="model_bookingpro_appointment"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_send_reminders()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+        <record id="ir_cron_bookingpro_send_customer_followups" model="ir.cron">
+            <field name="name">BookingPro: Send Customer Follow-up Emails</field>
+            <field name="model_id" ref="model_bookingpro_appointment"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_send_customer_followups()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+
+    </data>
+</odoo>

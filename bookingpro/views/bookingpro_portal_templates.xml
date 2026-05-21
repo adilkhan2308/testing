@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_bookingpro" name="BookingPro Portal Home" inherit_id="portal.portal_my_home">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Appointments</t>
+                <t t-set="url" t-value="'/my/bookingpro'"/>
+                <t t-set="placeholder_count" t-value="'bookingpro_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_bookingpro" name="BookingPro Premium Customer Portal">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="1"/>
+            <div class="bp-command-bar bp-command-customer" data-bookingpro-command-bar="customer">
+                <div class="bp-command-left">
+                    <span class="bp-command-logo">BP</span>
+                    <div>
+                        <strong>BookingPro Customer Portal</strong>
+                        <small>My appointments</small>
+                    </div>
+                </div>
+                <div class="bp-command-actions">
+                    <a t-if="bookingpro_is_internal" class="bp-command-btn bp-command-btn-soft" href="/bookingpro/backend">Backend</a>
+                    <a class="bp-command-btn bp-command-btn-danger" href="/web/session/logout?redirect=/bookingpro/login">Logout</a>
+                </div>
+            </div>
+            <div class="bp-customer-shell bp-customer-shell-with-command">
+                <section class="bp-customer-hero">
+                    <div>
+                        <div class="bp-customer-eyebrow">Customer Portal</div>
+                        <h1>My Appointments</h1>
+                        <p>Track your bookings, follow-up emails, reminders, cancellations, and reschedule requests from one clean workspace.</p>
+                    </div>
+                    <div class="bp-customer-hero-actions">
+                        <a t-if="bookingpro_is_internal" class="bp-customer-btn bp-customer-btn-soft" href="/bookingpro/workspace">Admin Workspace</a>
+                        <a class="bp-customer-btn bp-customer-btn-primary" t-att-href="bookingpro_public_url">Book New Appointment</a>
+                    </div>
+                </section>
+
+                <section class="bp-customer-stats">
+                    <div class="bp-customer-stat-card">
+                        <span>Total</span>
+                        <strong><t t-out="customer_portal_stats.get('total', 0)"/></strong>
+                        <small>All appointments</small>
+                    </div>
+                    <div class="bp-customer-stat-card">
+                        <span>Upcoming</span>
+                        <strong><t t-out="customer_portal_stats.get('upcoming', 0)"/></strong>
+                        <small>Scheduled ahead</small>
+                    </div>
+                    <div class="bp-customer-stat-card">
+                        <span>Completed</span>
+                        <strong><t t-out="customer_portal_stats.get('completed', 0)"/></strong>
+                        <small>Finished visits</small>
+                    </div>
+                    <div class="bp-customer-stat-card">
+                        <span>Follow-ups</span>
+                        <strong><t t-out="customer_portal_stats.get('followups', 0)"/></strong>
+                        <small>Active customer follow-up</small>
+                    </div>
+                </section>
+
+                <section class="bp-customer-panel">
+                    <div class="bp-customer-toolbar">
+                        <div>
+                            <h2>Appointment History</h2>
+                            <p>Filter, search, and open appointment details.</p>
+                        </div>
+                        <input class="bp-customer-search" type="search" placeholder="Search appointments..." data-bp-table-search="#bpCustomerAppointments"/>
+                    </div>
+
+                    <div class="bp-customer-filterbar">
+                        <a t-attf-class="bp-customer-filter #{'active' if filterby == 'all' else ''}" t-att-href="'/my/bookingpro?filterby=all&amp;sortby=%s' % sortby">All</a>
+                        <a t-attf-class="bp-customer-filter #{'active' if filterby == 'pending' else ''}" t-att-href="'/my/bookingpro?filterby=pending&amp;sortby=%s' % sortby">Pending</a>
+                        <a t-attf-class="bp-customer-filter #{'active' if filterby == 'confirmed' else ''}" t-att-href="'/my/bookingpro?filterby=confirmed&amp;sortby=%s' % sortby">Confirmed</a>
+                        <a t-attf-class="bp-customer-filter #{'active' if filterby == 'completed' else ''}" t-att-href="'/my/bookingpro?filterby=completed&amp;sortby=%s' % sortby">Completed</a>
+                        <a t-attf-class="bp-customer-filter #{'active' if filterby == 'cancelled' else ''}" t-att-href="'/my/bookingpro?filterby=cancelled&amp;sortby=%s' % sortby">Cancelled</a>
+                    </div>
+
+                    <t t-if="not appointments">
+                        <div class="bp-customer-empty">
+                            <div class="bp-customer-empty-icon">📅</div>
+                            <h3>No appointments yet</h3>
+                            <p>You do not have any appointment records for this portal account. Create a booking using the button below.</p>
+                            <a class="bp-customer-btn bp-customer-btn-primary" t-att-href="bookingpro_public_url">Book Your First Appointment</a>
+                        </div>
+                    </t>
+
+                    <t t-if="appointments">
+                        <div id="bpCustomerAppointments" class="bp-customer-appointment-grid">
+                            <t t-foreach="appointments" t-as="appointment">
+                                <article class="bp-customer-appointment-card">
+                                    <div class="bp-card-topline">
+                                        <div>
+                                            <span class="bp-reference"><t t-out="appointment.name"/></span>
+                                            <h3><t t-out="appointment.service_id.name"/></h3>
+                                        </div>
+                                        <span t-attf-class="bp-pill bp-status-#{appointment.state}">
+                                            <t t-out="dict(appointment._fields['state'].selection).get(appointment.state)"/>
+                                        </span>
+                                    </div>
+                                    <div class="bp-customer-meta-grid">
+                                        <div>
+                                            <small>Date &amp; Time</small>
+                                            <strong><span t-field="appointment.start_datetime" t-options="{'widget': 'datetime'}"/></strong>
+                                        </div>
+                                        <div>
+                                            <small>Staff</small>
+                                            <strong><t t-out="appointment.staff_user_id.name or 'Any available staff'"/></strong>
+                                        </div>
+                                        <div>
+                                            <small>Payment</small>
+                                            <strong><t t-out="dict(appointment._fields['payment_state'].selection).get(appointment.payment_state)"/></strong>
+                                        </div>
+                                        <div>
+                                            <small>Follow-up</small>
+                                            <span t-attf-class="bp-pill bp-followup-#{appointment.customer_followup_state}">
+                                                <t t-out="dict(appointment._fields['customer_followup_state'].selection).get(appointment.customer_followup_state)"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="bp-card-footerline">
+                                        <span t-if="appointment.customer_followup_requested" class="bp-small-note">Follow-up emails: <t t-out="appointment.customer_followup_email_count or 0"/> / <t t-out="appointment.customer_followup_max_emails or 3"/></span>
+                                        <span t-if="not appointment.customer_followup_requested" class="bp-small-note">No customer follow-up requested</span>
+                                        <a class="bp-customer-btn bp-customer-btn-soft" t-att-href="'/my/bookingpro/%s' % appointment.id">View Details</a>
+                                    </div>
+                                </article>
+                            </t>
+                        </div>
+                        <t t-call="portal.pager"/>
+                    </t>
+                </section>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_bookingpro_detail" name="BookingPro Premium Appointment Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="no_breadcrumbs" t-value="1"/>
+            <div class="bp-customer-shell bp-customer-detail-shell">
+                <div class="bp-customer-top-actions">
+                    <a t-if="bookingpro_is_internal" class="bp-customer-btn bp-customer-btn-soft" href="/bookingpro/backend">Backend</a>
+                    <a class="bp-customer-btn bp-customer-btn-danger" href="/web/session/logout?redirect=/bookingpro/login">Logout</a>
+                </div>
+                <section class="bp-customer-detail-hero">
+                    <div>
+                        <a class="bp-back-link" href="/my/bookingpro">← Back to appointments</a>
+                        <div class="bp-customer-eyebrow">Appointment Detail</div>
+                        <h1><t t-out="appointment.name"/></h1>
+                        <p><t t-out="appointment.service_id.name"/> with <t t-out="appointment.staff_user_id.name or 'available staff'"/></p>
+                    </div>
+                    <div class="bp-detail-status-box">
+                        <span t-attf-class="bp-pill bp-status-#{appointment.state}">
+                            <t t-out="dict(appointment._fields['state'].selection).get(appointment.state)"/>
+                        </span>
+                        <strong><span t-field="appointment.start_datetime" t-options="{'widget': 'datetime'}"/></strong>
+                    </div>
+                </section>
+
+                <t t-if="followup_saved">
+                    <div class="bp-customer-alert bp-customer-alert-success">Your follow-up request has been saved successfully.</div>
+                </t>
+                <t t-if="followup_error">
+                    <div class="bp-customer-alert bp-customer-alert-danger"><t t-out="followup_error"/></div>
+                </t>
+
+                <section class="bp-customer-detail-grid">
+                    <div class="bp-customer-detail-main">
+                        <div class="bp-customer-panel">
+                            <div class="bp-customer-toolbar compact">
+                                <div>
+                                    <h2>Booking Summary</h2>
+                                    <p>Service, staff, resource, and payment information.</p>
+                                </div>
+                            </div>
+                            <div class="bp-summary-list">
+                                <div><span>Service</span><strong><t t-out="appointment.service_id.name"/></strong></div>
+                                <div><span>Staff</span><strong><t t-out="appointment.staff_user_id.name or '-'"/></strong></div>
+                                <div><span>Resource</span><strong><t t-out="appointment.resource_id.name or '-'"/></strong></div>
+                                <div><span>Starts</span><strong><span t-field="appointment.start_datetime" t-options="{'widget': 'datetime'}"/></strong></div>
+                                <div><span>Ends</span><strong><span t-field="appointment.end_datetime" t-options="{'widget': 'datetime'}"/></strong></div>
+                                <div><span>Payment</span><strong><t t-out="dict(appointment._fields['payment_state'].selection).get(appointment.payment_state)"/></strong></div>
+                            </div>
+                            <t t-if="appointment.customer_note">
+                                <div class="bp-customer-note-box">
+                                    <h3>Your Booking Notes</h3>
+                                    <p><t t-out="appointment.customer_note"/></p>
+                                </div>
+                            </t>
+                        </div>
+
+                        <div class="bp-customer-panel">
+                            <div class="bp-customer-toolbar compact">
+                                <div>
+                                    <h2>Follow-up Center</h2>
+                                    <p>Request follow-up support and track automatic customer emails.</p>
+                                </div>
+                                <span t-attf-class="bp-pill bp-followup-#{appointment.customer_followup_state}">
+                                    <t t-out="dict(appointment._fields['customer_followup_state'].selection).get(appointment.customer_followup_state)"/>
+                                </span>
+                            </div>
+                            <div class="bp-followup-metrics">
+                                <div>
+                                    <small>Email interval</small>
+                                    <strong>Every <t t-out="appointment.customer_followup_interval_hours or 1"/> hour(s)</strong>
+                                </div>
+                                <div>
+                                    <small>Emails sent</small>
+                                    <strong><t t-out="appointment.customer_followup_email_count or 0"/> / <t t-out="appointment.customer_followup_max_emails or 3"/></strong>
+                                </div>
+                                <div>
+                                    <small>Next email</small>
+                                    <strong><t t-if="appointment.customer_followup_next_email_datetime"><span t-field="appointment.customer_followup_next_email_datetime" t-options="{'widget': 'datetime'}"/></t><t t-if="not appointment.customer_followup_next_email_datetime">Not scheduled</t></strong>
+                                </div>
+                            </div>
+                            <t t-if="appointment.customer_followup_email_error">
+                                <div class="bp-customer-alert bp-customer-alert-danger"><t t-out="appointment.customer_followup_email_error"/></div>
+                            </t>
+                            <form t-att-action="'/my/bookingpro/%s/followup' % appointment.id" method="post" class="bp-customer-form mt-3">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <label>Follow-up message</label>
+                                <textarea name="message" class="form-control" rows="4" placeholder="Write your follow-up question or instruction..."><t t-out="appointment.customer_followup_message or ''"/></textarea>
+                                <button class="bp-customer-btn bp-customer-btn-primary mt-3" type="submit">Save Follow-up Request</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <aside class="bp-customer-side">
+                        <div class="bp-customer-panel">
+                            <h2>Appointment Actions</h2>
+                            <p class="bp-side-copy">Use these actions for cancellation or reschedule requests.</p>
+                            <form t-if="appointment.state in ['pending','confirmed','rescheduled']" t-att-action="'/my/bookingpro/%s/cancel' % appointment.id" method="post" class="bp-customer-form mb-3">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <label>Cancellation reason</label>
+                                <textarea name="reason" class="form-control" rows="3" placeholder="Tell us why you want to cancel"></textarea>
+                                <button class="bp-customer-btn bp-customer-btn-danger w-100 mt-2" type="submit">Request Cancel</button>
+                            </form>
+                            <form t-if="appointment.state in ['pending','confirmed','rescheduled']" t-att-action="'/my/bookingpro/%s/reschedule-request' % appointment.id" method="post" class="bp-customer-form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <label>Preferred new time / reason</label>
+                                <textarea name="reason" class="form-control" rows="3" placeholder="Example: Monday after 2 PM"></textarea>
+                                <button class="bp-customer-btn bp-customer-btn-soft w-100 mt-2" type="submit">Request Reschedule</button>
+                            </form>
+                            <t t-if="appointment.state not in ['pending','confirmed','rescheduled']">
+                                <div class="bp-customer-empty compact">No customer action is available for this appointment status.</div>
+                            </t>
+                        </div>
+
+                        <div class="bp-customer-panel bp-support-card">
+                            <h2>Need Help?</h2>
+                            <p>Use follow-up messages for any question about your appointment. Our team will respond through the configured email flow.</p>
+                            <a class="bp-customer-btn bp-customer-btn-primary w-100" t-att-href="bookingpro_public_url">Book Another Appointment</a>
+                        </div>
+                    </aside>
+                </section>
+            </div>
+        </t>
+    </template>
+</odoo>

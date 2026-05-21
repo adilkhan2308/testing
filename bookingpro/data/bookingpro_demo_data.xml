@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        BookingPro demo/testing data.
+        Purpose: make admin portal and customer portal testing easier without changing module logic.
+        Customer portal test: create a customer account with email demo.customer@bookingpro.test
+        and password of your choice through /bookingpro/signup. The signup flow will link to
+        the demo contact below, so /my/bookingpro will show the demo appointments.
+    -->
+    <data noupdate="1">
+        <!-- Safe BookingPro demo settings. These help the portal demo show slots, CRM leads, and follow-ups. -->
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.slot_step_minutes', '30')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.create_crm_lead', 'True')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.enable_customer_followup', 'True')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.auto_customer_followup_on_booking', 'True')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.customer_followup_interval_hours', '1')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.customer_followup_max_emails', '3')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.allow_portal_cancel', 'True')"/>
+        <function model="ir.config_parameter" name="set_param" eval="('bookingpro.allow_portal_reschedule', 'True')"/>
+
+        <!-- Demo customers. Use demo.customer@bookingpro.test for the customer portal signup/login test. -->
+        <record id="partner_demo_customer_adil" model="res.partner">
+            <field name="name">Demo Customer Adil</field>
+            <field name="email">demo.customer@bookingpro.test</field>
+            <field name="phone">0300 000 0001</field>
+            <field name="company_type">person</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="bookingpro_customer_note">Demo customer for BookingPro customer portal testing. Sign up using this email to see demo bookings in /my/bookingpro.</field>
+        </record>
+
+        <record id="partner_demo_customer_abigail" model="res.partner">
+            <field name="name">Demo Customer Abigail</field>
+            <field name="email">demo.abigail@bookingpro.test</field>
+            <field name="phone">0300 000 0002</field>
+            <field name="company_type">person</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="bookingpro_customer_note">Second demo customer for admin portal testing.</field>
+        </record>
+
+        <!-- Demo service categories. -->
+        <record id="category_demo_hospital" model="bookingpro.category">
+            <field name="name">Demo Hospital</field>
+            <field name="description">Demo category for healthcare appointment testing.</field>
+            <field name="sequence">1</field>
+            <field name="website_published">True</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="color">4</field>
+        </record>
+
+        <record id="category_demo_consultation" model="bookingpro.category">
+            <field name="name">Demo Consultation</field>
+            <field name="description">Demo category for consultation and follow-up testing.</field>
+            <field name="sequence">2</field>
+            <field name="website_published">True</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="color">7</field>
+        </record>
+
+        <!-- Demo resources. -->
+        <record id="resource_demo_room_1" model="bookingpro.resource">
+            <field name="name">Demo Consultation Room 1</field>
+            <field name="resource_type">room</field>
+            <field name="description">Room used for demo appointment testing.</field>
+            <field name="location">Main Branch</field>
+            <field name="capacity">1</field>
+            <field name="sequence">1</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="resource_demo_dental_chair" model="bookingpro.resource">
+            <field name="name">Demo Dental Chair</field>
+            <field name="resource_type">equipment</field>
+            <field name="description">Equipment resource used for dental demo bookings.</field>
+            <field name="location">Dental Room</field>
+            <field name="capacity">1</field>
+            <field name="sequence">2</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <!-- Demo services. Admin user is assigned as demo staff to keep setup simple. -->
+        <record id="service_demo_dental_checkup" model="bookingpro.service">
+            <field name="name">Demo Dental Checkup</field>
+            <field name="code">DEMO-DENTAL</field>
+            <field name="category_id" ref="bookingpro.category_demo_hospital"/>
+            <field name="description"><![CDATA[<p>Demo dental appointment service for public booking, admin workspace, CRM lead, calendar, and customer portal testing.</p>]]></field>
+            <field name="sequence">1</field>
+            <field name="duration">1.0</field>
+            <field name="price">100.0</field>
+            <field name="capacity">1</field>
+            <field name="website_published">True</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="staff_user_ids" eval="[(6, 0, [ref('base.user_admin')])]"/>
+            <field name="resource_ids" eval="[(6, 0, [ref('bookingpro.resource_demo_dental_chair')])]"/>
+        </record>
+
+        <record id="service_demo_general_consultation" model="bookingpro.service">
+            <field name="name">Demo General Consultation</field>
+            <field name="code">DEMO-GENERAL</field>
+            <field name="category_id" ref="bookingpro.category_demo_consultation"/>
+            <field name="description"><![CDATA[<p>Demo consultation service for staff availability, slot, reminder, and follow-up testing.</p>]]></field>
+            <field name="sequence">2</field>
+            <field name="duration">1.0</field>
+            <field name="price">50.0</field>
+            <field name="capacity">1</field>
+            <field name="website_published">True</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="staff_user_ids" eval="[(6, 0, [ref('base.user_admin')])]"/>
+            <field name="resource_ids" eval="[(6, 0, [ref('bookingpro.resource_demo_room_1')])]"/>
+        </record>
+
+        <!-- Staff availability for the admin user, Monday to Friday, 09:00-17:00. -->
+        <record id="schedule_demo_admin_monday" model="bookingpro.staff.schedule">
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="weekday">0</field>
+            <field name="hour_from">9.0</field>
+            <field name="hour_to">17.0</field>
+            <field name="break_hour_from">13.0</field>
+            <field name="break_hour_to">14.0</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="notes">Demo Monday availability.</field>
+        </record>
+        <record id="schedule_demo_admin_tuesday" model="bookingpro.staff.schedule">
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="weekday">1</field>
+            <field name="hour_from">9.0</field>
+            <field name="hour_to">17.0</field>
+            <field name="break_hour_from">13.0</field>
+            <field name="break_hour_to">14.0</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="notes">Demo Tuesday availability.</field>
+        </record>
+        <record id="schedule_demo_admin_wednesday" model="bookingpro.staff.schedule">
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="weekday">2</field>
+            <field name="hour_from">9.0</field>
+            <field name="hour_to">17.0</field>
+            <field name="break_hour_from">13.0</field>
+            <field name="break_hour_to">14.0</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="notes">Demo Wednesday availability.</field>
+        </record>
+        <record id="schedule_demo_admin_thursday" model="bookingpro.staff.schedule">
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="weekday">3</field>
+            <field name="hour_from">9.0</field>
+            <field name="hour_to">17.0</field>
+            <field name="break_hour_from">13.0</field>
+            <field name="break_hour_to">14.0</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="notes">Demo Thursday availability.</field>
+        </record>
+        <record id="schedule_demo_admin_friday" model="bookingpro.staff.schedule">
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="weekday">4</field>
+            <field name="hour_from">9.0</field>
+            <field name="hour_to">17.0</field>
+            <field name="break_hour_from">13.0</field>
+            <field name="break_hour_to">14.0</field>
+            <field name="company_id" ref="base.main_company"/>
+            <field name="notes">Demo Friday availability.</field>
+        </record>
+
+        <!-- Demo appointments for admin dashboard and customer portal testing. -->
+        <record id="appointment_demo_customer_pending" model="bookingpro.appointment">
+            <field name="partner_id" ref="bookingpro.partner_demo_customer_adil"/>
+            <field name="service_id" ref="bookingpro.service_demo_general_consultation"/>
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="resource_id" ref="bookingpro.resource_demo_room_1"/>
+            <field name="start_datetime">2026-06-01 09:00:00</field>
+            <field name="end_datetime">2026-06-01 10:00:00</field>
+            <field name="state">pending</field>
+            <field name="customer_note">Demo pending appointment visible in admin workspace and customer portal after customer signup.</field>
+            <field name="customer_followup_requested">True</field>
+            <field name="customer_followup_message">Please follow up with me after this demo booking.</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="appointment_demo_customer_confirmed" model="bookingpro.appointment">
+            <field name="partner_id" ref="bookingpro.partner_demo_customer_adil"/>
+            <field name="service_id" ref="bookingpro.service_demo_dental_checkup"/>
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="resource_id" ref="bookingpro.resource_demo_dental_chair"/>
+            <field name="start_datetime">2026-06-02 10:00:00</field>
+            <field name="end_datetime">2026-06-02 11:00:00</field>
+            <field name="state">confirmed</field>
+            <field name="customer_note">Demo confirmed appointment for portal and reminder testing.</field>
+            <field name="customer_followup_requested">True</field>
+            <field name="customer_followup_message">Demo customer requested a follow-up email.</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="appointment_demo_customer_completed" model="bookingpro.appointment">
+            <field name="partner_id" ref="bookingpro.partner_demo_customer_adil"/>
+            <field name="service_id" ref="bookingpro.service_demo_general_consultation"/>
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="resource_id" ref="bookingpro.resource_demo_room_1"/>
+            <field name="start_datetime">2026-06-03 15:00:00</field>
+            <field name="end_datetime">2026-06-03 16:00:00</field>
+            <field name="state">completed</field>
+            <field name="customer_note">Demo completed appointment for customer history/stat cards.</field>
+            <field name="customer_followup_requested">False</field>
+            <field name="customer_followup_state">done</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+
+        <record id="appointment_demo_admin_reschedule" model="bookingpro.appointment">
+            <field name="partner_id" ref="bookingpro.partner_demo_customer_abigail"/>
+            <field name="service_id" ref="bookingpro.service_demo_dental_checkup"/>
+            <field name="staff_user_id" ref="base.user_admin"/>
+            <field name="resource_id" ref="bookingpro.resource_demo_dental_chair"/>
+            <field name="start_datetime">2026-06-04 11:00:00</field>
+            <field name="end_datetime">2026-06-04 12:00:00</field>
+            <field name="state">reschedule_requested</field>
+            <field name="customer_note">Demo reschedule request for admin pending actions testing.</field>
+            <field name="reschedule_reason">Customer requested a different time for the demo appointment.</field>
+            <field name="customer_followup_requested">True</field>
+            <field name="customer_followup_message">Please call me to confirm the new time.</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+    </data>
+</odoo>

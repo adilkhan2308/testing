@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_company_form_bookingpro" model="ir.ui.view">
+        <field name="name">res.company.form.bookingpro</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="BookingPro">
+                    <field name="bookingpro_slug"/>
+                    <field name="bookingpro_public_booking_url" readonly="1"/>
+                    <button name="action_bookingpro_open_public_link" type="object" string="Open Booking Link" class="btn-primary"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

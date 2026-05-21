@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="module_category_bookingpro" model="ir.module.category">
+            <field name="name">BookingPro</field>
+            <field name="description">Appointment booking and CRM management</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- Odoo 19 compatibility: res.groups now uses privilege_id, not category_id. -->
+        <record id="res_groups_privilege_bookingpro" model="res.groups.privilege">
+            <field name="name">BookingPro</field>
+            <field name="category_id" ref="bookingpro.module_category_bookingpro"/>
+            <field name="sequence">25</field>
+        </record>
+
+        <record id="group_bookingpro_customer" model="res.groups">
+            <field name="name">Customer Portal</field>
+            <field name="privilege_id" ref="bookingpro.res_groups_privilege_bookingpro"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+        <record id="group_bookingpro_staff" model="res.groups">
+            <field name="name">Staff</field>
+            <field name="privilege_id" ref="bookingpro.res_groups_privilege_bookingpro"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="group_bookingpro_booking_manager" model="res.groups">
+            <field name="name">Booking Manager</field>
+            <field name="privilege_id" ref="bookingpro.res_groups_privilege_bookingpro"/>
+            <field name="implied_ids" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="group_bookingpro_manager" model="res.groups">
+            <field name="name">Administrator</field>
+            <field name="privilege_id" ref="bookingpro.res_groups_privilege_bookingpro"/>
+            <field name="implied_ids" eval="[(4, ref('bookingpro.group_bookingpro_booking_manager'))]"/>
+        </record>
+
+        <!-- Odoo 19 compatibility:
+             Direct assignment through res.groups.users and res.users.groups_id is not accepted
+             during XML data load in this Odoo 19 environment. Instead, the standard
+             Settings/Administration group implies BookingPro Administrator, so admin users
+             automatically receive BookingPro access without writing to res.users. -->
+        <record id="base.group_system" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('bookingpro.group_bookingpro_manager'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_category_company" model="ir.rule">
+            <field name="name">BookingPro categories by company</field>
+            <field name="model_id" ref="model_bookingpro_category"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_service_company" model="ir.rule">
+            <field name="name">BookingPro services by company</field>
+            <field name="model_id" ref="model_bookingpro_service"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_resource_company" model="ir.rule">
+            <field name="name">BookingPro resources by company</field>
+            <field name="model_id" ref="model_bookingpro_resource"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_schedule_company" model="ir.rule">
+            <field name="name">BookingPro schedules by company</field>
+            <field name="model_id" ref="model_bookingpro_staff_schedule"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_appointment_company" model="ir.rule">
+            <field name="name">BookingPro appointments by company</field>
+            <field name="model_id" ref="model_bookingpro_appointment"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_booking_manager'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_appointment_staff_own" model="ir.rule">
+            <field name="name">BookingPro staff own appointments</field>
+            <field name="model_id" ref="model_bookingpro_appointment"/>
+            <field name="domain_force">['|', ('staff_user_id', '=', user.id), ('staff_user_id', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_appointment_portal_own" model="ir.rule">
+            <field name="name">BookingPro portal own appointments</field>
+            <field name="model_id" ref="model_bookingpro_appointment"/>
+            <field name="domain_force">[('partner_id', 'child_of', [user.partner_id.commercial_partner_id.id])]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_reschedule_history_company" model="ir.rule">
+            <field name="name">BookingPro reschedule history by company</field>
+            <field name="model_id" ref="model_bookingpro_reschedule_history"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_notification_log_company" model="ir.rule">
+            <field name="name">BookingPro notification logs by company</field>
+            <field name="model_id" ref="model_bookingpro_notification_log"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+        <record id="rule_bookingpro_feedback_company" model="ir.rule">
+            <field name="name">BookingPro feedback by company</field>
+            <field name="model_id" ref="model_bookingpro_feedback"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('bookingpro.group_bookingpro_staff'))]"/>
+        </record>
+
+    </data>
+</odoo>

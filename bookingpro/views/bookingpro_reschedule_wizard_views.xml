@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bookingpro_reschedule_wizard_form" model="ir.ui.view">
+        <field name="name">bookingpro.reschedule.wizard.form</field>
+        <field name="model">bookingpro.reschedule.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reschedule Appointment">
+                <group>
+                    <field name="appointment_id" readonly="1"/>
+                    <field name="new_start_datetime"/>
+                    <field name="new_end_datetime"/>
+                    <field name="reason"/>
+                </group>
+                <footer>
+                    <button name="action_apply_reschedule" string="Apply Reschedule" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

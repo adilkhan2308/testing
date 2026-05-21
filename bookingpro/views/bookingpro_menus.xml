@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_bookingpro_root" name="BookingPro" sequence="45" web_icon="bookingpro,static/description/icon.png" groups="bookingpro.group_bookingpro_staff"/>
+    <menuitem id="menu_bookingpro_dashboard" name="Dashboard" parent="menu_bookingpro_root" action="action_bookingpro_dashboard" sequence="1"/>
+
+    <menuitem id="menu_bookingpro_operations" name="Operations" parent="menu_bookingpro_root" sequence="10"/>
+    <menuitem id="menu_bookingpro_appointments" name="Appointments" parent="menu_bookingpro_operations" action="action_bookingpro_appointment" sequence="10"/>
+    <menuitem id="menu_bookingpro_calendar" name="Calendar" parent="menu_bookingpro_operations" action="action_bookingpro_appointment_calendar" sequence="20"/>
+    <menuitem id="menu_bookingpro_followups" name="Follow-ups" parent="menu_bookingpro_operations" action="action_bookingpro_followups" sequence="30"/>
+    <menuitem id="menu_bookingpro_crm_leads" name="CRM Leads" parent="menu_bookingpro_operations" action="action_bookingpro_crm_leads" sequence="40"/>
+
+    <menuitem id="menu_bookingpro_configuration" name="Configuration" parent="menu_bookingpro_root" sequence="80" groups="bookingpro.group_bookingpro_manager"/>
+    <menuitem id="menu_bookingpro_categories" name="Service Categories" parent="menu_bookingpro_configuration" action="action_bookingpro_category" sequence="10"/>
+    <menuitem id="menu_bookingpro_services" name="Services" parent="menu_bookingpro_configuration" action="action_bookingpro_service" sequence="20"/>
+    <menuitem id="menu_bookingpro_resources" name="Resources" parent="menu_bookingpro_configuration" action="action_bookingpro_resource" sequence="30"/>
+    <menuitem id="menu_bookingpro_schedules" name="Staff Availability" parent="menu_bookingpro_configuration" action="action_bookingpro_staff_schedule" sequence="40"/>
+    <menuitem id="menu_bookingpro_settings" name="Settings" parent="menu_bookingpro_configuration" action="action_bookingpro_config_settings" sequence="90"/>
+
+    <menuitem id="menu_bookingpro_reporting" name="Reporting" parent="menu_bookingpro_root" sequence="90" groups="bookingpro.group_bookingpro_booking_manager"/>
+    <menuitem id="menu_bookingpro_reports" name="Appointment Analysis" parent="menu_bookingpro_reporting" action="action_bookingpro_report_analysis" sequence="10"/>
+</odoo>

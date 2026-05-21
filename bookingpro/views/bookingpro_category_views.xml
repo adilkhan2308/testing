@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_bookingpro_category_tree" model="ir.ui.view">
+        <field name="name">bookingpro.category.list</field>
+        <field name="model">bookingpro.category</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="website_published"/>
+                <field name="service_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_bookingpro_category_form" model="ir.ui.view">
+        <field name="name">bookingpro.category.form</field>
+        <field name="model">bookingpro.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_bookingpro_service)d" type="action" class="oe_stat_button" icon="fa-list">
+                            <field name="service_count" widget="statinfo" string="Services"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                            <field name="website_published"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="color"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description" placeholder="Explain this service category..."/>
+                        </page>
+                        <page string="Services">
+                            <field name="service_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="duration"/>
+                                    <field name="price"/>
+                                    <field name="website_published"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bookingpro_category" model="ir.actions.act_window">
+        <field name="name">Service Categories</field>
+        <field name="res_model">bookingpro.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
